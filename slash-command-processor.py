@@ -32,53 +32,27 @@ def slash_command():
     """Parse the command parameters, validate them, and respond.
     Note: This URL must support HTTPS and serve a valid SSL certificate.
     """
-    # Parse the parameters you need
-    token = request.form.get('token', None)  # TODO: validate the token
+    token = request.form.get('token', None)
     text = request.form.get('text', None)
-    # Validate the request parameters
+    user_id = request.form.get('user_id', None)
     with open('secure.json') as secure:
-        slack_token = json.load(secure)['token']
+        slack_token = json.load(secure)['slack-authorization-token']
     if token != slack_token:
-        abort(400)
+        return 'This request could not be validated'
     if 'author' in text or 'Author' in text:
-        print(text)
-        email = text.split(' ')[1]
+        email = get_user(user_id)
         authorize(email)
-    # Use one of the following return statements
-    # 1. Return plain text
-    return 'Simple plain response to the slash command received'
-    # 2. Return a JSON payload
-    # See https://api.slack.com/docs/formatting and
-    # https://api.slack.com/docs/attachments to send richly formatted messages
-    return jsonify({
-        # Uncomment the line below for the response to be visible to everyone
-        # 'response_type': 'in_channel',
-        'text': 'More fleshed out response to the slash command',
-        'attachments': [
-            {
-                'fallback': 'Required plain-text summary of the attachment.',
-                'color': '#36a64f',
-                'pretext': 'Optional text above the attachment block',
-                'author_name': 'Bobby Tables',
-                'author_link': 'http://flickr.com/bobby/',
-                'author_icon': 'http://flickr.com/icons/bobby.jpg',
-                'title': 'Slack API Documentation',
-                'title_link': 'https://api.slack.com/',
-                'text': 'Optional text that appears within the attachment',
-                'fields': [
-                    {
-                        'title': 'Priority',
-                        'value': 'High',
-                        'short': False
-                    }
-                ],
-                'image_url': 'http://my-website.com/path/to/image.jpg',
-                'thumb_url': 'http://example.com/path/to/thumb.png'
-            }
-        ]
-    })
-    # 3. Send up to 5 responses within 30 minutes to the response_url
-    # Implement your custom logic here
+    return 'User {0} has been updated to Author'.format(email)
+
+
+
+def get_user(user_id):
+
+    with open('slack_user_list.json') as infile:
+        users = json.load(infile)
+    for u in users:
+        if u['id'] == user_id:
+            return u['email']
 
 def authorize(email):
 
