@@ -11,6 +11,7 @@ https://medium.com/slack-developer-blog/slash-commands-style-guide-4e91272aa43a#
 # import your app object
 from flask import request, jsonify, abort
 from flask import Flask
+import subprocess
 application = Flask(__name__)
 
 # The parameters included in a slash command request (with example values):
@@ -34,9 +35,10 @@ def slash_command():
     token = request.form.get('token', None)  # TODO: validate the token
     text = request.form.get('text', None)
     # Validate the request parameters
-    print(token)
-    if not token:  # or some other failure condition
-        abort(400)
+    if 'author' in text or 'Author' in text:
+        print(text)
+        email = text.split(' ')[1]
+        authorize(email)
     # Use one of the following return statements
     # 1. Return plain text
     return 'Simple plain response to the slash command received'
@@ -72,3 +74,9 @@ def slash_command():
     })
     # 3. Send up to 5 responses within 30 minutes to the response_url
     # Implement your custom logic here
+
+def authorize(email):
+
+    command = 'wp user set-role {0} author --allow-root --path=/var/www/html/'.format(email)
+
+    subprocess.call(command, shell=True)
