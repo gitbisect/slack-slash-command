@@ -11,6 +11,7 @@ https://medium.com/slack-developer-blog/slash-commands-style-guide-4e91272aa43a#
 # import your app object
 from flask import request, jsonify, abort
 from flask import Flask
+import json
 import subprocess
 application = Flask(__name__)
 
@@ -35,6 +36,10 @@ def slash_command():
     token = request.form.get('token', None)  # TODO: validate the token
     text = request.form.get('text', None)
     # Validate the request parameters
+    with open('secure.json') as secure:
+        slack_token = json.load(secure)['token']
+    if token != slack_token:
+        abort(400)
     if 'author' in text or 'Author' in text:
         print(text)
         email = text.split(' ')[1]
