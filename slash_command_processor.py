@@ -39,7 +39,7 @@ def slash_command():
         slack_token = json.load(secure)['slack-authorization-token']
     if token != slack_token:
         return 'This request could not be validated'
-    if 'author' in text or 'Author' in text:
+    if 'author' in text or 'Author' in text: # This is the context this example is interested in
         email = get_user(user_id)
         authorize(email)
     return 'User {0} has been updated to Author'.format(email)
