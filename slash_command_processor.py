@@ -40,9 +40,9 @@ def slash_command():
     if token != slack_token:
         return 'This request could not be validated'
     if 'author' in text or 'Author' in text: # This is the context this example is interested in
-        email = get_user(user_id)
-        authorize(email)
-    return 'User {0} has been updated to Author'.format(email)
+        email, user_name = get_user(user_id)
+        authorize(email, user_name)
+    return 'User {0} {1} has been updated to Author'.format(user_name, email)
 
 
 
@@ -52,10 +52,13 @@ def get_user(user_id):
         users = json.load(infile)
     for u in users:
         if u['id'] == user_id:
-            return u['email']
+            return u['email'], u['user_name']
 
-def authorize(email):
+def authorize(email, user_name):
 
-    command = 'wp user set-role {0} author --allow-root --path=/var/www/html/'.format(email)
-
+    command = 'wp user create {0} {1} --porcelain --allow-root --path=/var/www/html/'.format(user_name, email)
     subprocess.call(command, shell=True)
+    
+    command = 'wp user set-role {0} author --allow-root --path=/var/www/html/'.format(email)
+    subprocess.call(command, shell=True)
+
